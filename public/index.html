@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diablo War Plan</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Join Screen -->
+  <div id="join-screen" class="screen">
+    <div class="panel">
+      <h1 class="title">⚔️ Diablo War Plan</h1>
+      <p class="subtitle">Coordinate your party's battle plan</p>
+      <div class="form-group">
+        <label for="player-name">Your Name</label>
+        <input type="text" id="player-name" placeholder="Enter your name" maxlength="32" autocomplete="off" />
+      </div>
+      <button id="join-btn" class="btn btn-primary">Join War Council</button>
+    </div>
+  </div>
+
+  <!-- Main Screen -->
+  <div id="main-screen" class="screen hidden">
+    <header class="header">
+      <h1 class="title">⚔️ Diablo War Plan</h1>
+      <span id="player-label" class="player-label"></span>
+    </header>
+
+    <div class="content">
+      <!-- Selection Panel -->
+      <section class="panel selection-panel">
+        <h2 class="section-title">Your War Plan</h2>
+        <p class="hint">Select the activities you want to complete:</p>
+        <div class="skill-trees" id="skill-trees">
+          <!-- Populated by JS -->
+        </div>
+        <button id="submit-btn" class="btn btn-primary">Submit War Plan</button>
+      </section>
+
+      <!-- Players Panel -->
+      <section class="panel players-panel">
+        <h2 class="section-title">Party War Plans</h2>
+        <div id="players-list" class="players-list">
+          <p class="empty-msg">No players yet…</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
