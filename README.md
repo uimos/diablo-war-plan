@@ -8,6 +8,7 @@ Players can:
 - Preserve the exact order of picks.
 - Submit a manual "done count" number.
 - Toggle each submitted plan item as done/undone.
+- Persist player progress to disk and restore it on rejoin.
 - See all updates live across connected clients.
 
 ## Tech Stack
@@ -77,8 +78,9 @@ http://localhost:3100
 
 ## Current Behavior Notes
 
-- Data is stored in memory only (no database).
-- Refreshing/restarting the server clears all players and plans.
+- Active player connections are in memory.
+- Player progress is persisted to `data/players.json`.
+- Rejoining with the same player name restores saved plans and done count.
 - Toggling done/undone updates the per-item status icon:
 	- `○` = not done
 	- `✔` = done
@@ -90,7 +92,6 @@ http://localhost:3100
 
 ## Possible Next Improvements
 
-- Persist state in a database (or file) so data survives restarts.
 - Auto-calculate done count from toggled items (or sync both directions).
 - Add room codes for separate parties.
 - Add basic tests for server event handling.

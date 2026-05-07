@@ -24,6 +24,13 @@ const completedCountIn = document.getElementById('completed-count');
 const submitBtn     = document.getElementById('submit-btn');
 const playersList   = document.getElementById('players-list');
 let currentPicks = [];
+let mySubmittedPlans = [];
+let myCompletedCount = 0;
+
+function isPlanDone(plan) {
+  if (typeof plan === 'string') return false;
+  return plan?.done === true;
+}
 
 // ─── Build skill pick controls ────────────────────────────────────────────────
 SKILL_TREES.forEach(({ name, icon }) => {
@@ -84,11 +91,34 @@ playerNameIn.addEventListener('keydown', (e) => {
 
 // ─── Submit war plan ──────────────────────────────────────────────────────────
 submitBtn.addEventListener('click', () => {
-  const completedCount = Number.parseInt(completedCountIn.value, 10);
+  const hasExistingPlan = mySubmittedPlans.length > 0;
+  const hasUnfinishedExistingPlan = hasExistingPlan && mySubmittedPlans.some((plan) => !isPlanDone(plan));
+  const isExistingPlanFullyDone = hasExistingPlan && mySubmittedPlans.every((plan) => isPlanDone(plan));
+
+  if (hasUnfinishedExistingPlan) {
+    const confirmed = window.confirm(
+      'Your existing war plan is not fully done. Submitting now will overwrite it. Continue?'
+    );
+    if (!confirmed) return;
+  }
+
+  const completedCountInput = Number.parseInt(completedCountIn.value, 10);
+  let completedCount = Number.isInteger(completedCountInput) && completedCountInput >= 0
+    ? completedCountInput
+    : 0;
+
+  if (isExistingPlanFullyDone) {
+    completedCount = Math.max(myCompletedCount, completedCount) + 1;
+    completedCountIn.value = String(completedCount);
+  }
+
   socket.emit('submit', {
     plans: currentPicks,
-    completedCount: Number.isInteger(completedCount) && completedCount >= 0 ? completedCount : 0,
+    completedCount,
   });
+
+  currentPicks = [];
+  renderCurrentPicks();
 });
 
 // ─── Socket events ────────────────────────────────────────────────────────────
@@ -106,6 +136,16 @@ socket.on('update', (players) => {
 
 // ─── Render players ───────────────────────────────────────────────────────────
 function renderPlayers(players) {
+  const myPlayer = players.find((player) => player.id === mySocketId);
+  mySubmittedPlans = Array.isArray(myPlayer?.plans) ? myPlayer.plans : [];
+  myCompletedCount = Number.isInteger(myPlayer?.completedCount) && myPlayer.completedCount >= 0
+    ? myPlayer.completedCount
+    : 0;
+
+  if (document.activeElement !== completedCountIn) {
+    completedCountIn.value = String(myCompletedCount);
+  }
+
   if (!players.length) {
     playersList.innerHTML = '<p class="empty-msg">No players yet…</p>';
     return;
