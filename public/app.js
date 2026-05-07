@@ -20,12 +20,14 @@ const playerLabel   = document.getElementById('player-label');
 const skillTreesEl  = document.getElementById('skill-trees');
 const selectedPicksEl = document.getElementById('selected-picks');
 const clearPicksBtn = document.getElementById('clear-picks-btn');
-const completedCountIn = document.getElementById('completed-count');
 const submitBtn     = document.getElementById('submit-btn');
 const playersList   = document.getElementById('players-list');
+const confirmModal = document.getElementById('confirm-modal');
+const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
 let currentPicks = [];
 let mySubmittedPlans = [];
-let myCompletedCount = 0;
+let pendingConfirmAction = null;
 
 function isPlanDone(plan) {
   if (typeof plan === 'string') return false;
@@ -93,33 +95,60 @@ playerNameIn.addEventListener('keydown', (e) => {
 submitBtn.addEventListener('click', () => {
   const hasExistingPlan = mySubmittedPlans.length > 0;
   const hasUnfinishedExistingPlan = hasExistingPlan && mySubmittedPlans.some((plan) => !isPlanDone(plan));
-  const isExistingPlanFullyDone = hasExistingPlan && mySubmittedPlans.every((plan) => isPlanDone(plan));
 
   if (hasUnfinishedExistingPlan) {
-    const confirmed = window.confirm(
-      'Your existing war plan is not fully done. Submitting now will overwrite it. Continue?'
-    );
-    if (!confirmed) return;
+    openConfirmModal(submitCurrentPlan);
+    return;
   }
 
-  const completedCountInput = Number.parseInt(completedCountIn.value, 10);
-  let completedCount = Number.isInteger(completedCountInput) && completedCountInput >= 0
-    ? completedCountInput
-    : 0;
+  submitCurrentPlan();
+});
 
-  if (isExistingPlanFullyDone) {
-    completedCount = Math.max(myCompletedCount, completedCount) + 1;
-    completedCountIn.value = String(completedCount);
+confirmCancelBtn.addEventListener('click', closeConfirmModal);
+
+confirmSubmitBtn.addEventListener('click', () => {
+  if (typeof pendingConfirmAction !== 'function') {
+    closeConfirmModal();
+    return;
   }
+
+  const action = pendingConfirmAction;
+  closeConfirmModal();
+  action();
+});
+
+confirmModal.addEventListener('click', (event) => {
+  if (event.target === confirmModal) {
+    closeConfirmModal();
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !confirmModal.classList.contains('hidden')) {
+    closeConfirmModal();
+  }
+});
+
+function openConfirmModal(onConfirm) {
+  pendingConfirmAction = onConfirm;
+  confirmModal.classList.remove('hidden');
+  confirmSubmitBtn.focus();
+}
+
+function closeConfirmModal() {
+  pendingConfirmAction = null;
+  confirmModal.classList.add('hidden');
+}
+
+function submitCurrentPlan() {
 
   socket.emit('submit', {
     plans: currentPicks,
-    completedCount,
   });
 
   currentPicks = [];
   renderCurrentPicks();
-});
+}
 
 // ─── Socket events ────────────────────────────────────────────────────────────
 socket.on('connect', () => {
@@ -138,13 +167,6 @@ socket.on('update', (players) => {
 function renderPlayers(players) {
   const myPlayer = players.find((player) => player.id === mySocketId);
   mySubmittedPlans = Array.isArray(myPlayer?.plans) ? myPlayer.plans : [];
-  myCompletedCount = Number.isInteger(myPlayer?.completedCount) && myPlayer.completedCount >= 0
-    ? myPlayer.completedCount
-    : 0;
-
-  if (document.activeElement !== completedCountIn) {
-    completedCountIn.value = String(myCompletedCount);
-  }
 
   if (!players.length) {
     playersList.innerHTML = '<p class="empty-msg">No players yet…</p>';
@@ -154,16 +176,20 @@ function renderPlayers(players) {
   playersList.innerHTML = '';
   players.forEach(({ id, name, plans, completedCount }) => {
     const isMe = id === mySocketId;
+    const safeCompletedCount = Number.isInteger(completedCount) && completedCount >= 0 ? completedCount : 0;
     const card = document.createElement('div');
     card.className = 'player-card' + (isMe ? ' is-me' : '');
 
     const headerHtml = `
       <div class="player-card-header">
         <span class="player-name">${escHtml(name)}</span>
+        <span class="progress-count">Done: ${safeCompletedCount}</span>
         ${isMe ? '<span class="me-badge">You</span>' : ''}
       </div>`;
 
-    const progressHtml = `<p class="plan-progress">Done count: <span class="progress-count">${Number.isInteger(completedCount) ? completedCount : 0}</span></p>`;
+    const progressHtml = isMe
+      ? `<div class="plan-progress-row"><p class="plan-progress">Adjust done count</p><div class="plan-progress-edit"><input type="number" class="completed-count-input" min="0" step="1" value="${safeCompletedCount}" data-player-id="${escHtml(id)}" /><button type="button" class="btn btn-secondary btn-small save-completed-count" data-player-id="${escHtml(id)}">Save</button></div></div>`
+      : '';
 
     const plansHtml = plans.length
       ? `<div class="plan-tags">${plans.map((plan, index) => renderPlanTag(plan, index, id, isMe)).join('')}</div>`
@@ -190,6 +216,25 @@ function renderPlanTag(plan, index, playerId, isMe) {
 }
 
 playersList.addEventListener('click', (event) => {
+  const saveBtn = event.target.closest('.save-completed-count');
+  if (saveBtn) {
+    const playerId = saveBtn.dataset.playerId;
+    if (playerId !== mySocketId) return;
+
+    const row = saveBtn.closest('.plan-progress-edit');
+    const input = row?.querySelector('.completed-count-input');
+    if (!input) return;
+
+    const nextCompletedCount = Number.parseInt(input.value, 10);
+    if (!Number.isInteger(nextCompletedCount) || nextCompletedCount < 0) {
+      input.value = '0';
+      return;
+    }
+
+    socket.emit('set-completed-count', nextCompletedCount);
+    return;
+  }
+
   const btn = event.target.closest('.plan-toggle');
   if (!btn) return;
   const playerId = btn.dataset.playerId;

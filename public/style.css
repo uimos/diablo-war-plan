@@ -91,10 +91,6 @@ body {
   margin-bottom: 1.2rem;
 }
 
-.compact-form-group {
-  margin-bottom: 0.7rem;
-}
-
 .form-group label {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -111,12 +107,6 @@ input[type="text"] {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s;
-}
-
-#completed-count {
-  width: 100%;
-  font-size: 1.05rem;
-  padding: 0.75rem 0.9rem;
 }
 
 input[type="text"]:focus { border-color: var(--accent); }
@@ -157,6 +147,12 @@ input[type="text"]:focus { border-color: var(--accent); }
 .btn-secondary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-small {
+  width: auto;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
 }
 
 /* ─── Header ───────────────────────────────────────────────────────────────── */
@@ -290,6 +286,35 @@ input[type="text"]:focus { border-color: var(--accent); }
   margin-bottom: 0.5rem;
 }
 
+.plan-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-progress-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.completed-count-input {
+  width: 6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.completed-count-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
 .progress-count {
   color: var(--gold);
   font-weight: 700;
@@ -358,4 +383,38 @@ input[type="text"]:focus { border-color: var(--accent); }
   font-size: 0.8rem;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 20;
+}
+
+.confirm-panel {
+  width: min(460px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  padding: 1.2rem;
+}
+
+.confirm-panel .section-title {
+  margin-bottom: 0.7rem;
+}
+
+.confirm-panel .hint {
+  margin-bottom: 1rem;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
 }

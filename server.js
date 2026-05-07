@@ -61,6 +61,12 @@ function updateProfile(playerData) {
   saveProfiles();
 }
 
+function isPlanFullyDone(plans) {
+  return Array.isArray(plans)
+    && plans.length > 0
+    && plans.every((plan) => plan && plan.done === true);
+}
+
 io.on('connection', (socket) => {
   console.log(`Player connected: ${socket.id}`);
 
@@ -90,13 +96,7 @@ io.on('connection', (socket) => {
           .map((name) => ({ name, done: false }))
       : [];
 
-    const rawCompletedCount = Array.isArray(payload) ? 0 : payload?.completedCount;
-    const completedCount = Number.isInteger(rawCompletedCount) && rawCompletedCount >= 0
-      ? rawCompletedCount
-      : 0;
-
     players[socket.id].plans = validPlans;
-    players[socket.id].completedCount = completedCount;
     updateProfile(players[socket.id]);
     io.emit('update', getPlayerList());
   });
@@ -106,8 +106,28 @@ io.on('connection', (socket) => {
     if (!Number.isInteger(planIndex)) return;
     if (planIndex < 0 || planIndex >= players[socket.id].plans.length) return;
 
-    const plan = players[socket.id].plans[planIndex];
+    const player = players[socket.id];
+    const wasFullyDone = isPlanFullyDone(player.plans);
+
+    const plan = player.plans[planIndex];
     plan.done = !plan.done;
+    const isNowFullyDone = isPlanFullyDone(player.plans);
+
+    if (!wasFullyDone && isNowFullyDone) {
+      player.completedCount += 1;
+    } else if (wasFullyDone && !isNowFullyDone) {
+      player.completedCount = Math.max(0, player.completedCount - 1);
+    }
+
+    updateProfile(player);
+    io.emit('update', getPlayerList());
+  });
+
+  socket.on('set-completed-count', (nextCompletedCount) => {
+    if (!players[socket.id]) return;
+    if (!Number.isInteger(nextCompletedCount) || nextCompletedCount < 0) return;
+
+    players[socket.id].completedCount = nextCompletedCount;
     updateProfile(players[socket.id]);
     io.emit('update', getPlayerList());
   });

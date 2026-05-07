@@ -38,10 +38,6 @@
         <div class="selection-tools">
           <h3 class="queue-title">Current Pick Order</h3>
           <div id="selected-picks" class="plan-tags"></div>
-          <div class="form-group compact-form-group">
-            <label for="completed-count">How many war plans done</label>
-            <input type="number" id="completed-count" min="0" step="1" value="0" />
-          </div>
           <button id="clear-picks-btn" class="btn btn-secondary" type="button">Clear Picks</button>
         </div>
         <button id="submit-btn" class="btn btn-primary">Submit War Plan</button>
@@ -54,6 +50,17 @@
           <p class="empty-msg">No players yet…</p>
         </div>
       </section>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="confirm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+    <div class="confirm-panel">
+      <h3 id="confirm-title" class="section-title">Overwrite War Plan?</h3>
+      <p id="confirm-message" class="hint">Your existing war plan is not fully done. Submitting now will overwrite it. Continue?</p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel-btn" class="btn btn-secondary" type="button">Cancel</button>
+        <button id="confirm-submit-btn" class="btn btn-primary" type="button">Overwrite</button>
+      </div>
     </div>
   </div>
 
