@@ -18,26 +18,51 @@ const playerNameIn  = document.getElementById('player-name');
 const joinBtn       = document.getElementById('join-btn');
 const playerLabel   = document.getElementById('player-label');
 const skillTreesEl  = document.getElementById('skill-trees');
+const selectedPicksEl = document.getElementById('selected-picks');
+const clearPicksBtn = document.getElementById('clear-picks-btn');
+const completedCountIn = document.getElementById('completed-count');
 const submitBtn     = document.getElementById('submit-btn');
 const playersList   = document.getElementById('players-list');
+let currentPicks = [];
 
-// ─── Build skill-tree checkboxes ─────────────────────────────────────────────
+// ─── Build skill pick controls ────────────────────────────────────────────────
 SKILL_TREES.forEach(({ name, icon }) => {
-  const item = document.createElement('label');
+  const item = document.createElement('button');
+  item.type = 'button';
   item.className = 'skill-item';
   item.dataset.name = name;
   item.innerHTML = `
-    <input type="checkbox" value="${name}" />
     <span class="skill-icon">${icon}</span>
     <span class="skill-name">${name}</span>
-    <span class="checkmark">✓</span>
+    <span class="skill-action">Add</span>
   `;
-  const cb = item.querySelector('input[type="checkbox"]');
-  cb.addEventListener('change', () => {
-    item.classList.toggle('selected', cb.checked);
+  item.addEventListener('click', () => {
+    currentPicks.push(name);
+    renderCurrentPicks();
   });
   skillTreesEl.appendChild(item);
 });
+
+clearPicksBtn.addEventListener('click', () => {
+  currentPicks = [];
+  renderCurrentPicks();
+});
+
+function renderCurrentPicks() {
+  if (!currentPicks.length) {
+    selectedPicksEl.innerHTML = '<p class="empty-msg">No picks added yet.</p>';
+    clearPicksBtn.disabled = true;
+    return;
+  }
+
+  selectedPicksEl.innerHTML = currentPicks
+    .map((pick, index) => `<span class="plan-tag"><span class="plan-order">${index + 1}.</span> ${escHtml(pick)}</span>`)
+    .join('');
+
+  clearPicksBtn.disabled = false;
+}
+
+renderCurrentPicks();
 
 // ─── Join ─────────────────────────────────────────────────────────────────────
 function doJoin() {
@@ -59,10 +84,11 @@ playerNameIn.addEventListener('keydown', (e) => {
 
 // ─── Submit war plan ──────────────────────────────────────────────────────────
 submitBtn.addEventListener('click', () => {
-  const selected = Array.from(
-    skillTreesEl.querySelectorAll('input[type="checkbox"]:checked')
-  ).map((cb) => cb.value);
-  socket.emit('submit', selected);
+  const completedCount = Number.parseInt(completedCountIn.value, 10);
+  socket.emit('submit', {
+    plans: currentPicks,
+    completedCount: Number.isInteger(completedCount) && completedCount >= 0 ? completedCount : 0,
+  });
 });
 
 // ─── Socket events ────────────────────────────────────────────────────────────
@@ -86,7 +112,7 @@ function renderPlayers(players) {
   }
 
   playersList.innerHTML = '';
-  players.forEach(({ id, name, plans }) => {
+  players.forEach(({ id, name, plans, completedCount }) => {
     const isMe = id === mySocketId;
     const card = document.createElement('div');
     card.className = 'player-card' + (isMe ? ' is-me' : '');
@@ -97,14 +123,41 @@ function renderPlayers(players) {
         ${isMe ? '<span class="me-badge">You</span>' : ''}
       </div>`;
 
+    const progressHtml = `<p class="plan-progress">Done count: <span class="progress-count">${Number.isInteger(completedCount) ? completedCount : 0}</span></p>`;
+
     const plansHtml = plans.length
-      ? `<div class="plan-tags">${plans.map((p) => `<span class="plan-tag">${escHtml(p)}</span>`).join('')}</div>`
+      ? `<div class="plan-tags">${plans.map((plan, index) => renderPlanTag(plan, index, id, isMe)).join('')}</div>`
       : '<p class="no-plan">No plan selected yet</p>';
 
-    card.innerHTML = headerHtml + plansHtml;
+    card.innerHTML = headerHtml + progressHtml + plansHtml;
     playersList.appendChild(card);
   });
 }
+
+function renderPlanTag(plan, index, playerId, isMe) {
+  const normalized = typeof plan === 'string'
+    ? { name: plan, done: false }
+    : { name: plan.name, done: Boolean(plan.done) };
+
+  const doneClass = normalized.done ? ' is-done' : '';
+  const icon = normalized.done ? '✔' : '○';
+
+  if (isMe) {
+    return `<button class="plan-tag plan-toggle${doneClass}" type="button" data-player-id="${escHtml(playerId)}" data-plan-index="${index}" title="Toggle done"><span class="plan-order">${index + 1}.</span> ${escHtml(normalized.name)} <span class="plan-state">${icon}</span></button>`;
+  }
+
+  return `<span class="plan-tag${doneClass}"><span class="plan-order">${index + 1}.</span> ${escHtml(normalized.name)} <span class="plan-state">${icon}</span></span>`;
+}
+
+playersList.addEventListener('click', (event) => {
+  const btn = event.target.closest('.plan-toggle');
+  if (!btn) return;
+  const playerId = btn.dataset.playerId;
+  const planIndex = Number(btn.dataset.planIndex);
+
+  if (playerId !== mySocketId || !Number.isInteger(planIndex)) return;
+  socket.emit('toggle-plan', planIndex);
+});
 
 function escHtml(str) {
   return str

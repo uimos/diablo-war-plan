@@ -32,16 +32,37 @@ io.on('connection', (socket) => {
 
   socket.on('join', (name) => {
     const trimmed = (name || '').trim().slice(0, MAX_PLAYER_NAME_LENGTH) || 'Player';
-    players[socket.id] = { name: trimmed, plans: [] };
+    players[socket.id] = { name: trimmed, plans: [], completedCount: 0 };
     io.emit('update', getPlayerList());
   });
 
-  socket.on('submit', (plans) => {
+  socket.on('submit', (payload) => {
     if (!players[socket.id]) return;
-    const validPlans = Array.isArray(plans)
-      ? plans.filter((p) => VALID_PLANS.includes(p))
+
+    const plansInput = Array.isArray(payload) ? payload : payload?.plans;
+    const validPlans = Array.isArray(plansInput)
+      ? plansInput
+          .filter((p) => VALID_PLANS.includes(p))
+          .map((name) => ({ name, done: false }))
       : [];
+
+    const rawCompletedCount = Array.isArray(payload) ? 0 : payload?.completedCount;
+    const completedCount = Number.isInteger(rawCompletedCount) && rawCompletedCount >= 0
+      ? rawCompletedCount
+      : 0;
+
     players[socket.id].plans = validPlans;
+    players[socket.id].completedCount = completedCount;
+    io.emit('update', getPlayerList());
+  });
+
+  socket.on('toggle-plan', (planIndex) => {
+    if (!players[socket.id]) return;
+    if (!Number.isInteger(planIndex)) return;
+    if (planIndex < 0 || planIndex >= players[socket.id].plans.length) return;
+
+    const plan = players[socket.id].plans[planIndex];
+    plan.done = !plan.done;
     io.emit('update', getPlayerList());
   });
 
@@ -57,6 +78,7 @@ function getPlayerList() {
     id,
     name: data.name,
     plans: data.plans,
+    completedCount: data.completedCount || 0,
   }));
 }
 

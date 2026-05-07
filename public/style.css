@@ -91,6 +91,10 @@ body {
   margin-bottom: 1.2rem;
 }
 
+.compact-form-group {
+  margin-bottom: 0.7rem;
+}
+
 .form-group label {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -131,6 +135,23 @@ input[type="text"]:focus { border-color: var(--accent); }
 }
 
 .btn-primary:hover { background: var(--accent-h); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 100%;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ─── Header ───────────────────────────────────────────────────────────────── */
 .header {
@@ -191,16 +212,11 @@ input[type="text"]:focus { border-color: var(--accent); }
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   user-select: none;
+  width: 100%;
+  text-align: left;
 }
 
 .skill-item:hover { border-color: var(--accent); }
-
-.skill-item.selected {
-  border-color: var(--gold);
-  background: #2a1e0a;
-}
-
-.skill-item input[type="checkbox"] { display: none; }
 
 .skill-icon {
   font-size: 1.3rem;
@@ -213,16 +229,31 @@ input[type="text"]:focus { border-color: var(--accent); }
   flex: 1;
 }
 
-.skill-item.selected .skill-name { color: var(--gold); }
-
-.checkmark {
-  font-size: 1rem;
+.skill-action {
+  font-size: 0.75rem;
+  text-transform: uppercase;
   color: var(--gold);
-  opacity: 0;
-  transition: opacity 0.15s;
+  border: 1px solid var(--tag-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
 }
 
-.skill-item.selected .checkmark { opacity: 1; }
+.selection-tools {
+  margin-bottom: 1rem;
+}
+
+.queue-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+#selected-picks {
+  margin-bottom: 0.7rem;
+  min-height: 2.2rem;
+}
 
 /* ─── Players List ─────────────────────────────────────────────────────────── */
 .players-list { display: flex; flex-direction: column; gap: 0.8rem; }
@@ -245,6 +276,17 @@ input[type="text"]:focus { border-color: var(--accent); }
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.plan-progress {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.progress-count {
+  color: var(--gold);
+  font-weight: 700;
 }
 
 .player-name {
@@ -275,6 +317,35 @@ input[type="text"]:focus { border-color: var(--accent); }
   color: var(--tag-text);
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
+}
+
+.plan-toggle {
+  cursor: pointer;
+}
+
+.plan-toggle:hover {
+  border-color: var(--gold);
+}
+
+.plan-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.plan-tag.is-done {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.plan-state {
+  margin-left: 0.25rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.plan-order {
+  color: var(--gold);
+  font-weight: 700;
 }
 
 .no-plan {

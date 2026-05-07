@@ -31,9 +31,18 @@
       <!-- Selection Panel -->
       <section class="panel selection-panel">
         <h2 class="section-title">Your War Plan</h2>
-        <p class="hint">Select the activities you want to complete:</p>
+        <p class="hint">Click activities to build your plan. Duplicate picks are allowed and order matters. After submitting, click your items under Party War Plans to mark done/undone.</p>
         <div class="skill-trees" id="skill-trees">
           <!-- Populated by JS -->
+        </div>
+        <div class="selection-tools">
+          <h3 class="queue-title">Current Pick Order</h3>
+          <div id="selected-picks" class="plan-tags"></div>
+          <div class="form-group compact-form-group">
+            <label for="completed-count">How many war plans done</label>
+            <input type="number" id="completed-count" min="0" step="1" value="0" />
+          </div>
+          <button id="clear-picks-btn" class="btn btn-secondary" type="button">Clear Picks</button>
         </div>
         <button id="submit-btn" class="btn btn-primary">Submit War Plan</button>
       </section>
