@@ -3,6 +3,18 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 
+const MAX_PLAYER_NAME_LENGTH = 32;
+
+const VALID_PLANS = [
+  'Helltides',
+  'Hordes',
+  'Kurast Undercity',
+  'Lair Boss',
+  'Nightmare Dungeon',
+  'Pits',
+  'Tree of Whispers',
+];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -47,18 +59,6 @@ function getPlayerList() {
     plans: data.plans,
   }));
 }
-
-const MAX_PLAYER_NAME_LENGTH = 32;
-
-const VALID_PLANS = [
-  'Helltides',
-  'Hordes',
-  'Kurast Undercity',
-  'Lair Boss',
-  'Nightmare Dungeon',
-  'Pits',
-  'Tree of Whispers',
-];
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
