@@ -418,3 +418,33 @@ input[type="text"]:focus { border-color: var(--accent); }
   grid-template-columns: 1fr 1fr;
   gap: 0.7rem;
 }
+
+.lair-boss-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 520px) {
+  .lair-boss-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lair-boss-option {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.lair-boss-option:hover {
+  border-color: var(--gold);
+  background: #2a1e0a;
+}

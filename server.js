@@ -6,6 +6,20 @@ const fs = require('fs');
 
 const MAX_PLAYER_NAME_LENGTH = 32;
 
+const LAIR_BOSSES = [
+  'Grigoire',
+  'Beast of the Ice',
+  'Varshan',
+  'Lord Zir',
+  'Urivar',
+  'Duriel',
+  'Andariel',
+  'Harbinger of Hatred',
+  'Bloody Butcher',
+  'Belial',
+  'Mephisto',
+];
+
 const VALID_PLANS = [
   'Helltides',
   'Hordes',
@@ -14,6 +28,7 @@ const VALID_PLANS = [
   'Nightmare Dungeon',
   'Pits',
   'Tree of Whispers',
+  ...LAIR_BOSSES.map((boss) => `Lair Boss: ${boss}`),
 ];
 
 const app = express();

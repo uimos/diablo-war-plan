@@ -8,6 +8,20 @@ const SKILL_TREES = [
   { name: 'Tree of Whispers',  icon: '🌿' },
 ];
 
+const LAIR_BOSSES = [
+  'Grigoire',
+  'Beast of the Ice',
+  'Varshan',
+  'Lord Zir',
+  'Urivar',
+  'Duriel',
+  'Andariel',
+  'Harbinger of Hatred',
+  'Bloody Butcher',
+  'Belial',
+  'Mephisto',
+];
+
 const socket = io();
 let mySocketId = null;
 
@@ -25,6 +39,9 @@ const playersList   = document.getElementById('players-list');
 const confirmModal = document.getElementById('confirm-modal');
 const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
+const lairBossModal = document.getElementById('lair-boss-modal');
+const lairBossCancelBtn = document.getElementById('lair-boss-cancel-btn');
+const lairBossOptions = document.getElementById('lair-boss-options');
 let currentPicks = [];
 let mySubmittedPlans = [];
 let pendingConfirmAction = null;
@@ -46,10 +63,39 @@ SKILL_TREES.forEach(({ name, icon }) => {
     <span class="skill-action">Add</span>
   `;
   item.addEventListener('click', () => {
+    if (name === 'Lair Boss') {
+      openLairBossModal();
+      return;
+    }
+
     currentPicks.push(name);
     renderCurrentPicks();
   });
   skillTreesEl.appendChild(item);
+});
+
+lairBossOptions.innerHTML = LAIR_BOSSES
+  .map((boss) => `<button class="lair-boss-option" type="button" data-boss-name="${escHtml(boss)}">${escHtml(boss)}</button>`)
+  .join('');
+
+lairBossOptions.addEventListener('click', (event) => {
+  const option = event.target.closest('.lair-boss-option');
+  if (!option) return;
+
+  const bossName = option.dataset.bossName;
+  if (!bossName) return;
+
+  currentPicks.push(`Lair Boss: ${bossName}`);
+  renderCurrentPicks();
+  closeLairBossModal();
+});
+
+lairBossCancelBtn.addEventListener('click', closeLairBossModal);
+
+lairBossModal.addEventListener('click', (event) => {
+  if (event.target === lairBossModal) {
+    closeLairBossModal();
+  }
 });
 
 clearPicksBtn.addEventListener('click', () => {
@@ -124,7 +170,14 @@ confirmModal.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !confirmModal.classList.contains('hidden')) {
+  if (event.key !== 'Escape') return;
+
+  if (!lairBossModal.classList.contains('hidden')) {
+    closeLairBossModal();
+    return;
+  }
+
+  if (!confirmModal.classList.contains('hidden')) {
     closeConfirmModal();
   }
 });
@@ -138,6 +191,16 @@ function openConfirmModal(onConfirm) {
 function closeConfirmModal() {
   pendingConfirmAction = null;
   confirmModal.classList.add('hidden');
+}
+
+function openLairBossModal() {
+  lairBossModal.classList.remove('hidden');
+  const firstOption = lairBossOptions.querySelector('.lair-boss-option');
+  if (firstOption) firstOption.focus();
+}
+
+function closeLairBossModal() {
+  lairBossModal.classList.add('hidden');
 }
 
 function submitCurrentPlan() {
