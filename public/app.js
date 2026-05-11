@@ -1,11 +1,25 @@
 const SKILL_TREES = [
-  { name: 'Helltides',         icon: '🔥' },
-  { name: 'Hordes',            icon: '💀' },
-  { name: 'Kurast Undercity',  icon: '🏛️' },
-  { name: 'Lair Boss',         icon: '🐉' },
-  { name: 'Nightmare Dungeon', icon: '🌑' },
-  { name: 'Pits',              icon: '⚔️' },
-  { name: 'Tree of Whispers',  icon: '🌿' },
+  { name: 'Helltides',         iconAsset: '/assets/helltide.png' },
+  { name: 'Hordes',            iconAsset: '/assets/infernal-hordes.png' },
+  { name: 'Kurast Undercity',  iconAsset: '/assets/the-undercity.png' },
+  { name: 'Lair Boss',         iconAsset: '/assets/lair-bosses.png' },
+  { name: 'Nightmare Dungeon', iconAsset: '/assets/nightmare-dungeons.png' },
+  { name: 'Pits',              iconAsset: '/assets/the-pit.png' },
+  { name: 'Tree of Whispers',  iconAsset: '/assets/tree-of-whispers.png' },
+];
+
+const LAIR_BOSSES = [
+  'Grigoire',
+  'Beast of the Ice',
+  'Varshan',
+  'Lord Zir',
+  'Urivar',
+  'Duriel',
+  'Andariel',
+  'Harbinger of Hatred',
+  'Bloody Butcher',
+  'Belial',
+  'Mephisto',
 ];
 
 const socket = io();
@@ -25,6 +39,9 @@ const playersList   = document.getElementById('players-list');
 const confirmModal = document.getElementById('confirm-modal');
 const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
+const lairBossModal = document.getElementById('lair-boss-modal');
+const lairBossCancelBtn = document.getElementById('lair-boss-cancel-btn');
+const lairBossOptions = document.getElementById('lair-boss-options');
 let currentPicks = [];
 let mySubmittedPlans = [];
 let pendingConfirmAction = null;
@@ -35,21 +52,50 @@ function isPlanDone(plan) {
 }
 
 // ─── Build skill pick controls ────────────────────────────────────────────────
-SKILL_TREES.forEach(({ name, icon }) => {
+SKILL_TREES.forEach(({ name, iconAsset }) => {
   const item = document.createElement('button');
   item.type = 'button';
   item.className = 'skill-item';
   item.dataset.name = name;
   item.innerHTML = `
-    <span class="skill-icon">${icon}</span>
+    <img class="skill-icon skill-icon-asset" src="${escHtml(iconAsset)}" alt="${escHtml(name)} icon" />
     <span class="skill-name">${name}</span>
     <span class="skill-action">Add</span>
   `;
   item.addEventListener('click', () => {
+    if (name === 'Lair Boss') {
+      openLairBossModal();
+      return;
+    }
+
     currentPicks.push(name);
     renderCurrentPicks();
   });
   skillTreesEl.appendChild(item);
+});
+
+lairBossOptions.innerHTML = LAIR_BOSSES
+  .map((boss) => `<button class="lair-boss-option" type="button" data-boss-name="${escHtml(boss)}">${escHtml(boss)}</button>`)
+  .join('');
+
+lairBossOptions.addEventListener('click', (event) => {
+  const option = event.target.closest('.lair-boss-option');
+  if (!option) return;
+
+  const bossName = option.dataset.bossName;
+  if (!bossName) return;
+
+  currentPicks.push(`Lair Boss: ${bossName}`);
+  renderCurrentPicks();
+  closeLairBossModal();
+});
+
+lairBossCancelBtn.addEventListener('click', closeLairBossModal);
+
+lairBossModal.addEventListener('click', (event) => {
+  if (event.target === lairBossModal) {
+    closeLairBossModal();
+  }
 });
 
 clearPicksBtn.addEventListener('click', () => {
@@ -124,7 +170,14 @@ confirmModal.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !confirmModal.classList.contains('hidden')) {
+  if (event.key !== 'Escape') return;
+
+  if (!lairBossModal.classList.contains('hidden')) {
+    closeLairBossModal();
+    return;
+  }
+
+  if (!confirmModal.classList.contains('hidden')) {
     closeConfirmModal();
   }
 });
@@ -138,6 +191,16 @@ function openConfirmModal(onConfirm) {
 function closeConfirmModal() {
   pendingConfirmAction = null;
   confirmModal.classList.add('hidden');
+}
+
+function openLairBossModal() {
+  lairBossModal.classList.remove('hidden');
+  const firstOption = lairBossOptions.querySelector('.lair-boss-option');
+  if (firstOption) firstOption.focus();
+}
+
+function closeLairBossModal() {
+  lairBossModal.classList.add('hidden');
 }
 
 function submitCurrentPlan() {
