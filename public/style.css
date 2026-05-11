@@ -225,6 +225,13 @@ input[type="text"]:focus { border-color: var(--accent); }
   flex-shrink: 0;
 }
 
+.skill-icon-asset {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
 .skill-name {
   font-size: 0.95rem;
   color: var(--text);

@@ -1,11 +1,11 @@
 const SKILL_TREES = [
-  { name: 'Helltides',         icon: '🔥' },
-  { name: 'Hordes',            icon: '💀' },
-  { name: 'Kurast Undercity',  icon: '🏛️' },
-  { name: 'Lair Boss',         icon: '🐉' },
-  { name: 'Nightmare Dungeon', icon: '🌑' },
-  { name: 'Pits',              icon: '⚔️' },
-  { name: 'Tree of Whispers',  icon: '🌿' },
+  { name: 'Helltides',         iconAsset: '/assets/helltide.png' },
+  { name: 'Hordes',            iconAsset: '/assets/infernal-hordes.png' },
+  { name: 'Kurast Undercity',  iconAsset: '/assets/the-undercity.png' },
+  { name: 'Lair Boss',         iconAsset: '/assets/lair-bosses.png' },
+  { name: 'Nightmare Dungeon', iconAsset: '/assets/nightmare-dungeons.png' },
+  { name: 'Pits',              iconAsset: '/assets/the-pit.png' },
+  { name: 'Tree of Whispers',  iconAsset: '/assets/tree-of-whispers.png' },
 ];
 
 const LAIR_BOSSES = [
@@ -52,13 +52,13 @@ function isPlanDone(plan) {
 }
 
 // ─── Build skill pick controls ────────────────────────────────────────────────
-SKILL_TREES.forEach(({ name, icon }) => {
+SKILL_TREES.forEach(({ name, iconAsset }) => {
   const item = document.createElement('button');
   item.type = 'button';
   item.className = 'skill-item';
   item.dataset.name = name;
   item.innerHTML = `
-    <span class="skill-icon">${icon}</span>
+    <img class="skill-icon skill-icon-asset" src="${escHtml(iconAsset)}" alt="${escHtml(name)} icon" />
     <span class="skill-name">${name}</span>
     <span class="skill-action">Add</span>
   `;
