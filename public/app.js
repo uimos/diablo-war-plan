@@ -1,10 +1,10 @@
 const SKILL_TREES = [
   { name: 'Helltides',         iconAsset: '/assets/helltide.png' },
-  { name: 'Hordes',            iconAsset: '/assets/infernal-hordes.png' },
-  { name: 'Kurast Undercity',  iconAsset: '/assets/the-undercity.png' },
-  { name: 'Lair Boss',         iconAsset: '/assets/lair-bosses.png' },
-  { name: 'Nightmare Dungeon', iconAsset: '/assets/nightmare-dungeons.png' },
-  { name: 'Pits',              iconAsset: '/assets/the-pit.png' },
+  { name: 'Infernal Hordes',            iconAsset: '/assets/infernal-hordes.png' },
+  { name: 'The Undercity',  iconAsset: '/assets/the-undercity.png' },
+  { name: 'Lair Bosses',         iconAsset: '/assets/lair-bosses.png' },
+  { name: 'Nightmare Dungeons', iconAsset: '/assets/nightmare-dungeons.png' },
+  { name: 'The Pit',              iconAsset: '/assets/the-pit.png' },
   { name: 'Tree of Whispers',  iconAsset: '/assets/tree-of-whispers.png' },
 ];
 
@@ -60,7 +60,6 @@ SKILL_TREES.forEach(({ name, iconAsset }) => {
   item.innerHTML = `
     <img class="skill-icon skill-icon-asset" src="${escHtml(iconAsset)}" alt="${escHtml(name)} icon" />
     <span class="skill-name">${name}</span>
-    <span class="skill-action">Add</span>
   `;
   item.addEventListener('click', () => {
     if (name === 'Lair Boss') {

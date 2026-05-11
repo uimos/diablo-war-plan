@@ -197,10 +197,16 @@ input[type="text"]:focus { border-color: var(--accent); }
 
 /* ─── Skill Tree Checkboxes ────────────────────────────────────────────────── */
 .skill-trees {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
   margin-bottom: 1.4rem;
+}
+
+@media (max-width: 560px) {
+  .skill-trees {
+    grid-template-columns: 1fr;
+  }
 }
 
 .skill-item {
@@ -226,8 +232,8 @@ input[type="text"]:focus { border-color: var(--accent); }
 }
 
 .skill-icon-asset {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 3rem;
+  height: 3rem;
   object-fit: cover;
   border-radius: 4px;
 }
@@ -236,15 +242,6 @@ input[type="text"]:focus { border-color: var(--accent); }
   font-size: 0.95rem;
   color: var(--text);
   flex: 1;
-}
-
-.skill-action {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid var(--tag-border);
-  border-radius: 999px;
-  padding: 0.2rem 0.55rem;
 }
 
 .selection-tools {
