@@ -1,11 +1,11 @@
 const SKILL_TREES = [
-  { name: 'Helltides',         iconAsset: '/assets/helltide.png' },
-  { name: 'Infernal Hordes',            iconAsset: '/assets/infernal-hordes.png' },
-  { name: 'The Undercity',  iconAsset: '/assets/the-undercity.png' },
-  { name: 'Lair Bosses',         iconAsset: '/assets/lair-bosses.png' },
-  { name: 'Nightmare Dungeons', iconAsset: '/assets/nightmare-dungeons.png' },
-  { name: 'The Pit',              iconAsset: '/assets/the-pit.png' },
-  { name: 'Tree of Whispers',  iconAsset: '/assets/tree-of-whispers.png' },
+  { key: 'helltides', name: 'Helltides', iconAsset: '/assets/helltide.png' },
+  { key: 'hordes', name: 'Infernal Hordes', iconAsset: '/assets/infernal-hordes.png' },
+  { key: 'undercity', name: 'The Undercity', iconAsset: '/assets/the-undercity.png' },
+  { key: 'lair-boss', name: 'Lair Bosses', iconAsset: '/assets/lair-bosses.png' },
+  { key: 'nightmare-dungeon', name: 'Nightmare Dungeons', iconAsset: '/assets/nightmare-dungeons.png' },
+  { key: 'pit', name: 'The Pit', iconAsset: '/assets/the-pit.png' },
+  { key: 'tree-whispers', name: 'Tree of Whispers', iconAsset: '/assets/tree-of-whispers.png' },
 ];
 
 const LAIR_BOSSES = [
@@ -52,17 +52,18 @@ function isPlanDone(plan) {
 }
 
 // ─── Build skill pick controls ────────────────────────────────────────────────
-SKILL_TREES.forEach(({ name, iconAsset }) => {
+SKILL_TREES.forEach(({ key, name, iconAsset }) => {
   const item = document.createElement('button');
   item.type = 'button';
   item.className = 'skill-item';
   item.dataset.name = name;
+  item.dataset.key = key;
   item.innerHTML = `
     <img class="skill-icon skill-icon-asset" src="${escHtml(iconAsset)}" alt="${escHtml(name)} icon" />
     <span class="skill-name">${name}</span>
   `;
   item.addEventListener('click', () => {
-    if (name === 'Lair Boss') {
+    if (key === 'lair-boss') {
       openLairBossModal();
       return;
     }

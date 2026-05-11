@@ -22,10 +22,15 @@ const LAIR_BOSSES = [
 
 const VALID_PLANS = [
   'Helltides',
+  'Infernal Hordes',
   'Hordes',
+  'The Undercity',
   'Kurast Undercity',
+  'Lair Bosses',
   'Lair Boss',
+  'Nightmare Dungeons',
   'Nightmare Dungeon',
+  'The Pit',
   'Pits',
   'Tree of Whispers',
   ...LAIR_BOSSES.map((boss) => `Lair Boss: ${boss}`),
