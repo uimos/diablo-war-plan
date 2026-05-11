@@ -32,7 +32,6 @@ const VALID_PLANS = [
   'Nightmare Dungeon',
   'The Pit',
   'Pits',
-  'Tree of Whispers',
   ...LAIR_BOSSES.map((boss) => `Lair Boss: ${boss}`),
 ];
 

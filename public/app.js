@@ -1,11 +1,10 @@
 const SKILL_TREES = [
   { key: 'helltides', name: 'Helltides', iconAsset: '/assets/helltide.png' },
   { key: 'hordes', name: 'Infernal Hordes', iconAsset: '/assets/infernal-hordes.png' },
-  { key: 'undercity', name: 'The Undercity', iconAsset: '/assets/the-undercity.png' },
   { key: 'lair-boss', name: 'Lair Bosses', iconAsset: '/assets/lair-bosses.png' },
   { key: 'nightmare-dungeon', name: 'Nightmare Dungeons', iconAsset: '/assets/nightmare-dungeons.png' },
   { key: 'pit', name: 'The Pit', iconAsset: '/assets/the-pit.png' },
-  { key: 'tree-whispers', name: 'Tree of Whispers', iconAsset: '/assets/tree-of-whispers.png' },
+  { key: 'undercity', name: 'The Undercity', iconAsset: '/assets/the-undercity.png' },
 ];
 
 const LAIR_BOSSES = [

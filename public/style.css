@@ -258,7 +258,6 @@ input[type="text"]:focus { border-color: var(--accent); }
 
 #selected-picks {
   margin-bottom: 0.7rem;
-  min-height: 2.2rem;
 }
 
 /* ─── Players List ─────────────────────────────────────────────────────────── */
