@@ -35,6 +35,8 @@ const selectedPicksEl = document.getElementById('selected-picks');
 const clearPicksBtn = document.getElementById('clear-picks-btn');
 const submitBtn     = document.getElementById('submit-btn');
 const playersList   = document.getElementById('players-list');
+const suggestOrderBtn = document.getElementById('suggest-order-btn');
+const recommendationList = document.getElementById('recommendation-list');
 const confirmModal = document.getElementById('confirm-modal');
 const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
@@ -100,6 +102,10 @@ lairBossModal.addEventListener('click', (event) => {
 clearPicksBtn.addEventListener('click', () => {
   currentPicks = [];
   renderCurrentPicks();
+});
+
+suggestOrderBtn.addEventListener('click', () => {
+  socket.emit('recommend-order');
 });
 
 function renderCurrentPicks() {
@@ -225,6 +231,10 @@ socket.on('update', (players) => {
   renderPlayers(players);
 });
 
+socket.on('recommendation', (recommendation) => {
+  renderRecommendation(recommendation);
+});
+
 // ─── Render players ───────────────────────────────────────────────────────────
 function renderPlayers(players) {
   const myPlayer = players.find((player) => player.id === mySocketId);
@@ -275,6 +285,20 @@ function renderPlanTag(plan, index, playerId, isMe) {
   }
 
   return `<span class="plan-tag${doneClass}"><span class="plan-order">${index + 1}.</span> ${escHtml(normalized.name)} <span class="plan-state">${icon}</span></span>`;
+}
+
+function renderRecommendation(recommendation) {
+  if (!recommendation || !Array.isArray(recommendation.items) || !recommendation.items.length) {
+    recommendationList.innerHTML = '<p class="empty-msg">No recommendation available yet.</p>';
+    return;
+  }
+
+  recommendationList.innerHTML = recommendation.items
+    .map((item, index) => {
+      const reason = item.reason || '';
+      return `<div class="recommendation-item"><span class="recommendation-rank">${index + 1}.</span><p class="recommendation-activity">${escHtml(item.activity)}</p><span class="recommendation-info" title="${escHtml(reason)}" aria-label="Why this recommendation">ⓘ</span></div>`;
+    })
+    .join('');
 }
 
 playersList.addEventListener('click', (event) => {

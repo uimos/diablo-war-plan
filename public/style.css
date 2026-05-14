@@ -248,6 +248,77 @@ input[type="text"]:focus { border-color: var(--accent); }
   margin-bottom: 1rem;
 }
 
+.recommendation-panel {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(34, 34, 34, 0.55);
+}
+
+.recommendation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.recommendation-header .queue-title {
+  margin-bottom: 0;
+}
+
+.beta-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.06rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--tag-border);
+  background: var(--tag-bg);
+  color: var(--gold);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.recommendation-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.recommendation-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--tag-border);
+  border-radius: 999px;
+  background: var(--tag-bg);
+  padding: 0.2rem 0.55rem;
+}
+
+.recommendation-rank {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.recommendation-activity {
+  color: var(--tag-text);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.recommendation-info {
+  color: var(--gold);
+  font-size: 0.72rem;
+  cursor: help;
+  flex-shrink: 0;
+}
+
 .queue-title {
   font-size: 0.85rem;
   color: var(--text-muted);

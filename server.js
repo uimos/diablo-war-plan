@@ -35,6 +35,14 @@ const VALID_PLANS = [
   ...LAIR_BOSSES.map((boss) => `Lair Boss: ${boss}`),
 ];
 
+const PLAN_ALIASES = {
+  Hordes: 'Infernal Hordes',
+  'Kurast Undercity': 'The Undercity',
+  'Lair Boss': 'Lair Bosses',
+  'Nightmare Dungeon': 'Nightmare Dungeons',
+  Pits: 'The Pit',
+};
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -84,6 +92,109 @@ function isPlanFullyDone(plans) {
   return Array.isArray(plans)
     && plans.length > 0
     && plans.every((plan) => plan && plan.done === true);
+}
+
+function canonicalPlanName(name) {
+  if (typeof name !== 'string') return '';
+  if (name.startsWith('Lair Boss: ')) return name;
+  return PLAN_ALIASES[name] || name;
+}
+
+function getOutstandingPlanNames(plans) {
+  if (!Array.isArray(plans)) return [];
+
+  return plans
+    .map((plan) => (typeof plan === 'string' ? { name: plan, done: false } : plan))
+    .filter((plan) => plan && typeof plan.name === 'string' && plan.done !== true)
+    .map((plan) => canonicalPlanName(plan.name));
+}
+
+function recommendBestOrder(playerList) {
+  const partySize = playerList.length;
+  const playersWithPlans = playerList
+    .map((player) => ({
+      id: player.id,
+      completedCount: Number.isInteger(player.completedCount) ? player.completedCount : 0,
+      pending: getOutstandingPlanNames(player.plans),
+    }))
+    .filter((player) => player.pending.length > 0);
+
+  if (!partySize || !playersWithPlans.length) {
+    return {
+      generatedAt: Date.now(),
+      partySize,
+      items: [],
+    };
+  }
+
+  const maxCompleted = playersWithPlans.reduce(
+    (max, player) => Math.max(max, player.completedCount),
+    0,
+  );
+
+  const queues = playersWithPlans.map((player) => ({
+    ...player,
+    pending: [...player.pending],
+    // Lower completed count gets larger priority weight.
+    priorityWeight: (maxCompleted - player.completedCount) + 1,
+  }));
+
+  const ordered = [];
+  let guard = queues.reduce((sum, player) => sum + player.pending.length, 0);
+
+  while (guard > 0 && queues.some((player) => player.pending.length > 0)) {
+    const frontier = new Map();
+
+    queues.forEach((player) => {
+      if (!player.pending.length) return;
+
+      const activity = player.pending[0];
+      if (!frontier.has(activity)) {
+        frontier.set(activity, {
+          activity,
+          players: 0,
+          weightedPriority: 0,
+          doneSum: 0,
+        });
+      }
+
+      const entry = frontier.get(activity);
+      entry.players += 1;
+      entry.weightedPriority += player.priorityWeight;
+      entry.doneSum += player.completedCount;
+    });
+
+    if (!frontier.size) break;
+
+    const best = Array.from(frontier.values())
+      .sort((a, b) => {
+        if (b.weightedPriority !== a.weightedPriority) return b.weightedPriority - a.weightedPriority;
+        if (b.players !== a.players) return b.players - a.players;
+        const avgDoneA = a.doneSum / Math.max(1, a.players);
+        const avgDoneB = b.doneSum / Math.max(1, b.players);
+        if (avgDoneA !== avgDoneB) return avgDoneA - avgDoneB;
+        return a.activity.localeCompare(b.activity);
+      })[0];
+
+    ordered.push({
+      activity: best.activity,
+      reason: `Front-of-queue for ${best.players}/${partySize} players. Priority boosted for players with lower done count.`,
+    });
+
+    queues.forEach((player) => {
+      if (player.pending[0] === best.activity) {
+        player.pending.shift();
+      }
+    });
+
+    guard -= 1;
+  }
+
+  return {
+    generatedAt: Date.now(),
+    partySize,
+    items: ordered,
+  };
 }
 
 io.on('connection', (socket) => {
@@ -149,6 +260,11 @@ io.on('connection', (socket) => {
     players[socket.id].completedCount = nextCompletedCount;
     updateProfile(players[socket.id]);
     io.emit('update', getPlayerList());
+  });
+
+  socket.on('recommend-order', () => {
+    const recommendation = recommendBestOrder(getPlayerList());
+    io.emit('recommendation', recommendation);
   });
 
   socket.on('disconnect', () => {
