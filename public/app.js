@@ -23,6 +23,7 @@ const LAIR_BOSSES = [
 
 const socket = io();
 let mySocketId = null;
+const PLAYER_NAME_STORAGE_KEY = 'diabloWarPlan.playerName';
 
 // ─── DOM refs ────────────────────────────────────────────────────────────────
 const joinScreen    = document.getElementById('join-screen');
@@ -30,6 +31,7 @@ const mainScreen    = document.getElementById('main-screen');
 const playerNameIn  = document.getElementById('player-name');
 const joinBtn       = document.getElementById('join-btn');
 const playerLabel   = document.getElementById('player-label');
+const logoutBtn     = document.getElementById('logout-btn');
 const skillTreesEl  = document.getElementById('skill-trees');
 const selectedPicksEl = document.getElementById('selected-picks');
 const clearPicksBtn = document.getElementById('clear-picks-btn');
@@ -46,6 +48,30 @@ const lairBossOptions = document.getElementById('lair-boss-options');
 let currentPicks = [];
 let mySubmittedPlans = [];
 let pendingConfirmAction = null;
+
+function getSavedPlayerName() {
+  try {
+    return localStorage.getItem(PLAYER_NAME_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function savePlayerName(name) {
+  try {
+    localStorage.setItem(PLAYER_NAME_STORAGE_KEY, name);
+  } catch {
+    // Ignore storage errors (private mode / disabled storage).
+  }
+}
+
+function clearSavedPlayerName() {
+  try {
+    localStorage.removeItem(PLAYER_NAME_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors (private mode / disabled storage).
+  }
+}
 
 function isPlanDone(plan) {
   if (typeof plan === 'string') return false;
@@ -124,20 +150,39 @@ function renderCurrentPicks() {
 
 renderCurrentPicks();
 
+const savedName = getSavedPlayerName();
+if (savedName) {
+  enterMainAsName(savedName);
+}
+
 // ─── Join ─────────────────────────────────────────────────────────────────────
+function enterMainAsName(name) {
+  const trimmedName = name.trim();
+  if (!trimmedName) return;
+
+  savePlayerName(trimmedName);
+  playerNameIn.value = trimmedName;
+  socket.emit('join', trimmedName);
+  playerLabel.textContent = `⚔ ${trimmedName}`;
+  joinScreen.classList.add('hidden');
+  mainScreen.classList.remove('hidden');
+}
+
 function doJoin() {
   const name = playerNameIn.value.trim();
   if (!name) {
     playerNameIn.focus();
     return;
   }
-  socket.emit('join', name);
-  playerLabel.textContent = `⚔ ${name}`;
-  joinScreen.classList.add('hidden');
-  mainScreen.classList.remove('hidden');
+
+  enterMainAsName(name);
 }
 
 joinBtn.addEventListener('click', doJoin);
+logoutBtn.addEventListener('click', () => {
+  clearSavedPlayerName();
+  window.location.reload();
+});
 playerNameIn.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doJoin();
 });

@@ -168,6 +168,12 @@ input[type="text"]:focus { border-color: var(--accent); }
 
 .header .title { font-size: 1.4rem; margin: 0; }
 
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
 .player-label {
   font-size: 0.9rem;
   color: var(--gold);
