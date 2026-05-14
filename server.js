@@ -109,6 +109,11 @@ function getOutstandingPlanNames(plans) {
     .map((plan) => canonicalPlanName(plan.name));
 }
 
+function isLairBossActivity(activity) {
+  return typeof activity === 'string'
+    && (activity === 'Lair Bosses' || activity.startsWith('Lair Boss: '));
+}
+
 function recommendBestOrder(playerList) {
   const partySize = playerList.length;
   const playersWithPlans = playerList
@@ -166,8 +171,18 @@ function recommendBestOrder(playerList) {
 
     if (!frontier.size) break;
 
+    const remainingPlayers = queues.filter((player) => player.pending.length > 0);
+    const allOnLastActivity = remainingPlayers.length > 0
+      && remainingPlayers.every((player) => player.pending.length === 1);
+
     const best = Array.from(frontier.values())
       .sort((a, b) => {
+        if (allOnLastActivity) {
+          const aIsLair = isLairBossActivity(a.activity);
+          const bIsLair = isLairBossActivity(b.activity);
+          if (aIsLair !== bIsLair) return aIsLair ? -1 : 1;
+        }
+
         if (b.weightedPriority !== a.weightedPriority) return b.weightedPriority - a.weightedPriority;
         if (b.players !== a.players) return b.players - a.players;
         const avgDoneA = a.doneSum / Math.max(1, a.players);
@@ -176,9 +191,17 @@ function recommendBestOrder(playerList) {
         return a.activity.localeCompare(b.activity);
       })[0];
 
+    const reasonParts = [
+      `Front-of-queue for ${best.players}/${partySize} players.`,
+      'Priority boosted for players with lower done count.',
+    ];
+    if (allOnLastActivity && isLairBossActivity(best.activity)) {
+      reasonParts.push('Final-step rule applied: Lair Boss prioritized.');
+    }
+
     ordered.push({
       activity: best.activity,
-      reason: `Front-of-queue for ${best.players}/${partySize} players. Priority boosted for players with lower done count.`,
+      reason: reasonParts.join(' '),
     });
 
     queues.forEach((player) => {
