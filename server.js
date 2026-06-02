@@ -8,7 +8,7 @@ const MAX_PLAYER_NAME_LENGTH = 32;
 
 const LAIR_BOSSES = [
   'Grigoire',
-  'Beast of the Ice',
+  'Beast on the Ice',
   'Varshan',
   'Lord Zir',
   'Urivar',
