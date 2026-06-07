@@ -9,7 +9,7 @@ const SKILL_TREES = [
 
 const LAIR_BOSSES = [
   'Grigoire',
-  'Beast on the Ice',
+  'Beast in the Ice',
   'Varshan',
   'Lord Zir',
   'Urivar',
